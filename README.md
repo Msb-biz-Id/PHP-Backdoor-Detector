@@ -39,13 +39,13 @@ Ancaman siber terus berevolusi, dan *backdoor* seringkali menjadi pintu masuk ut
 ### Instalasi Cepat
 
 1.  **Unduh File:**
-    * Kloning repositori ini atau unduh file `Backdoor_scanner.php` dan `signatures.json` secara manual.
+    * Kloning repositori ini atau unduh file `Backdoor-scanner.php` dan `signatures.json` secara manual.
 2.  **Tempatkan di Server:**
-    * Unggah kedua file (`Backdoor_scanner.php` dan `signatures.json`) ke direktori *web root* atau direktori lain yang ingin Anda pindai di server PHP Anda (misalnya, `/public_html/` atau `htdocs/`).
+    * Unggah kedua file (`Backdoor-scanner.php` dan `signatures.json`) ke direktori *web root* atau direktori lain yang ingin Anda pindai di server PHP Anda (misalnya, `/public_html/` atau `htdocs/`).
     * **Sangat direkomendasikan untuk menempatkan *scanner* di lokasi yang tidak mudah diakses publik atau melindunginya dengan otentikasi HTTP dasar.** Hapus skrip ini dari server setelah selesai digunakan untuk mengurangi risiko keamanan.
 3.  **Konfigurasi (Opsional):**
-    * Buka `Backdoor_scanner.php` menggunakan editor teks.
-    * Pada baris sekitar **~20**, Anda dapat menyesuaikan variabel `$scan_root` untuk menentukan direktori utama yang akan dipindai. Secara *default*, `$scan_root` diatur ke direktori di mana skrip `Backdoor_scanner.php` berada (`__DIR__`).
+    * Buka `Backdoor-scanner.php` menggunakan editor teks.
+    * Pada baris sekitar **~20**, Anda dapat menyesuaikan variabel `$scan_root` untuk menentukan direktori utama yang akan dipindai. Secara *default*, `$scan_root` diatur ke direktori di mana skrip `Backdoor-scanner.php` berada (`__DIR__`).
         ```php
         $scan_root = __DIR__; // Pindai direktori tempat skrip berada
         // Atau untuk memindai seluruh web root:
@@ -57,7 +57,7 @@ Ancaman siber terus berevolusi, dan *backdoor* seringkali menjadi pintu masuk ut
 
 ## Cara Penggunaan
 
-1.  **Akses Scanner:** Buka *browser* web Anda dan navigasikan ke URL `Backdoor_scanner.php` di server Anda (misalnya, `https://yourdomain.com/Backdoor_scanner.php`).
+1.  **Akses Scanner:** Buka *browser* web Anda dan navigasikan ke URL `Backdoor-scanner.php` di server Anda (misalnya, `https://yourdomain.com/Backdoor-scanner.php`).
 2.  **Mulai Pemindaian:** Skrip akan secara otomatis memulai pemindaian saat halaman dimuat.
 3.  **Menganalisis Hasil:**
     * Tabel hasil akan menampilkan daftar file yang cocok dengan signatur.
