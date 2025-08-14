@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>Flappy Bird</h1>
+            <div class="score-display">
+                <span class="label">Score:</span>
+                <span id="currentScore">0</span>
+                <span class="separator">|</span>
+                <span class="label">Best:</span>
+                <span id="bestScore">0</span>
+            </div>
+        </div>
+        
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas"></canvas>
+            <div id="gameOverScreen" class="game-over-screen hidden">
+                <div class="game-over-content">
+                    <h2>Game Over!</h2>
+                    <div class="final-score">
+                        <p>Score: <span id="finalScore">0</span></p>
+                        <p>Best: <span id="finalBest">0</span></p>
+                    </div>
+                    <button id="restartBtn" class="btn-restart">Play Again</button>
+                </div>
+            </div>
+            <div id="startScreen" class="start-screen">
+                <div class="start-content">
+                    <h2>Flappy Bird</h2>
+                    <p class="instructions">Press SPACE or Click to fly</p>
+                    <p class="instructions">Avoid the pipes!</p>
+                    <button id="startBtn" class="btn-start">Start Game</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="pauseBtn" class="btn-control">Pause</button>
+            <button id="muteBtn" class="btn-control">Mute</button>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>

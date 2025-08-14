@@ -1,93 +1,104 @@
-# Professional PHP Backdoor Scanner
+# 🐦 Flappy Bird Game
 
-## Pendahuluan
+A modern, web-based implementation of the classic Flappy Bird game with beautiful UI, smooth animations, and sound effects.
 
-**Professional PHP Backdoor Scanner** adalah alat audit keamanan yang dirancang khusus untuk mendeteksi dan mengidentifikasi *backdoor*, *webshell*, serta kode-kode mencurigakan lainnya yang sering disisipkan ke dalam aplikasi PHP. Dengan arsitektur berbasis signatur yang kuat dan antarmuka yang intuitif, alat ini menjadi aset tak ternilai bagi auditor keamanan, pengembang, dan administrator sistem dalam menjaga integritas dan keamanan aplikasi web berbasis PHP.
+## 🎮 Play the Game
 
-Ancaman siber terus berevolusi, dan *backdoor* seringkali menjadi pintu masuk utama bagi penyerang untuk mempertahankan akses persisten ke server Anda. Alat ini membantu mengidentifikasi keberadaan anomali kode, termasuk teknik obfuscasi canggih, perintah eksekusi shell yang disalahgunakan, dan indikator aktivitas jahat lainnya yang mungkin terlewat oleh tinjauan manual.
+Simply open `index.html` in your web browser to start playing!
 
-## Fitur Utama
+## 🎯 How to Play
 
-* **Pemindaian Berbasis Signatur Canggih:** Menggunakan database signatur JSON yang ekstensif dan dapat diperbarui, dirancang untuk mendeteksi berbagai jenis pola kode berbahaya, termasuk:
-    * Teknik obfuscasi (`base64_decode`, `gzinflate`, `str_rot13`, `eval`).
-    * Fungsi eksekusi perintah sistem (`system()`, `exec()`, `passthru()`, `shell_exec()`, `popen()`).
-    * Mekanisme unggah *webshell* (`copy($_FILES)`, `move_uploaded_file`).
-    * Indikator *webshell* umum (`c99`, `r57`, `PhpSpy`).
-    * Pola terkait injeksi konten SEO *blackhat* atau *defacement* (nama merek judi online, kata kunci *gacor*, *maxwin*).
-    * Deteksi pola kompleks di seluruh baris kode.
-* **Identifikasi Lokasi Kode Akurat:** Menyediakan *file path* lengkap, **nomor baris awal**, dan **nomor baris akhir** dari setiap temuan yang cocok, mempercepat proses investigasi manual.
-* **Konteks Kode Interaktif:** Menyajikan cuplikan kode di sekitar temuan (beberapa baris sebelum dan sesudah), dengan bagian yang cocok **disorot** untuk memudahkan analisis kontekstual.
-* **Klasifikasi Tingkat Keparahan (Severity):** Setiap temuan diklasifikasikan ke dalam tingkat keparahan (CRITICAL, HIGH, MEDIUM, LOW), memungkinkan Anda memprioritaskan mitigasi ancaman secara efektif.
-* **Antarmuka Pengguna Responsif & Estetis:**
-    * Desain UI yang modern dengan nuansa "hacker profesional" (tema gelap, teks hijau neon/biru cyber, efek *glow*).
-    * **Tabel hasil yang responsif** dengan tata letak *card* pada perangkat seluler, memastikan keterbacaan optimal tanpa *horizontal scrolling*.
-    * Animasi *background* efek hujan matriks (*Matrix rain effect*) untuk pengalaman visual yang imersif.
-* **Filter Temuan Interaktif:** Saring hasil pemindaian secara *real-time* berdasarkan tingkat keparahan, memungkinkan Anda untuk fokus pada ancaman paling mendesak.
-* **Ekspor Laporan Audit:** Kemampuan untuk mengekspor semua temuan ke dalam file CSV (*Comma Separated Values*), yang dapat dengan mudah diimpor dan dianalisis di *spreadsheet software* seperti Microsoft Excel atau Google Sheets.
-* **Laporan dalam Bahasa Indonesia:** Deskripsi dan saran remediasi untuk setiap signatur disajikan dalam Bahasa Indonesia untuk kemudahan pemahaman.
+1. **Start the Game**: Click the "Start Game" button or press the SPACE key
+2. **Control the Bird**: 
+   - Press **SPACE** key to make the bird fly up
+   - Click or tap anywhere on the game canvas
+   - The bird will automatically fall due to gravity
+3. **Avoid Obstacles**: Navigate through the green pipes without hitting them
+4. **Score Points**: Successfully pass through pipes to increase your score
+5. **Game Over**: The game ends when you hit a pipe or the ground
 
-## Memulai
+## ✨ Features
 
-### Prasyarat
+- **Beautiful Modern UI**: Gradient backgrounds, smooth animations, and responsive design
+- **Sound Effects**: Jump, score, and game over sounds (can be muted)
+- **High Score Tracking**: Your best score is saved locally
+- **Pause/Resume**: Pause the game at any time
+- **Touch Support**: Works on mobile devices with touch controls
+- **Responsive Design**: Adapts to different screen sizes
 
-* **Server Web:** Apache, Nginx, LiteSpeed, atau server web lain yang mendukung PHP.
-* **PHP:** Versi 7.4 atau lebih tinggi (direkomendasikan PHP 8.x+ untuk performa dan keamanan terbaik).
-    * Ekstensi PHP `json` harus diaktifkan (umumnya aktif secara *default*).
-    * Ekstensi PHP `gd` mungkin diperlukan untuk beberapa efek visual di masa depan (tidak wajib untuk fitur saat ini).
-* **Akses File:** Skrip memerlukan izin baca yang memadai ke file dan direktori yang akan dipindai.
+## 🎨 Game Elements
 
-### Instalasi Cepat
+- **Bird**: A colorful bird that responds to your controls with realistic physics
+- **Pipes**: Green obstacles that appear at random heights
+- **Background**: Animated sky with moving clouds and ground
+- **Score Display**: Real-time score and best score tracking
 
-1.  **Unduh File:**
-    * Kloning repositori ini atau unduh file `Backdoor-scanner.php` dan `signatures.json` secara manual.
-2.  **Tempatkan di Server:**
-    * Unggah kedua file (`Backdoor-scanner.php` dan `signatures.json`) ke direktori *web root* atau direktori lain yang ingin Anda pindai di server PHP Anda (misalnya, `/public_html/` atau `htdocs/`).
-    * **Sangat direkomendasikan untuk menempatkan *scanner* di lokasi yang tidak mudah diakses publik atau melindunginya dengan otentikasi HTTP dasar.** Hapus skrip ini dari server setelah selesai digunakan untuk mengurangi risiko keamanan.
-3.  **Konfigurasi (Opsional):**
-    * Buka `Backdoor-scanner.php` menggunakan editor teks.
-    * Pada baris sekitar **~20**, Anda dapat menyesuaikan variabel `$scan_root` untuk menentukan direktori utama yang akan dipindai. Secara *default*, `$scan_root` diatur ke direktori di mana skrip `Backdoor-scanner.php` berada (`__DIR__`).
-        ```php
-        $scan_root = __DIR__; // Pindai direktori tempat skrip berada
-        // Atau untuk memindai seluruh web root:
-        // $scan_root = $_SERVER['DOCUMENT_ROOT'];
-        // Atau untuk direktori spesifik:
-        // $scan_root = '/path/to/your/website/files';
-        ```
-    * Periksa juga variabel `$signature_db_path` (sekitar baris 23) untuk memastikan path ke `signatures.json` sudah benar jika Anda menempatkannya di lokasi lain.
+## ⌨️ Controls
 
-## Cara Penggunaan
+| Action | Keyboard | Mouse/Touch |
+|--------|----------|-------------|
+| Fly/Jump | SPACE | Click/Tap |
+| Start Game | SPACE | Click Button |
+| Pause/Resume | - | Pause Button |
+| Mute/Unmute | - | Mute Button |
 
-1.  **Akses Scanner:** Buka *browser* web Anda dan navigasikan ke URL `Backdoor-scanner.php` di server Anda (misalnya, `https://yourdomain.com/Backdoor-scanner.php`).
-2.  **Mulai Pemindaian:** Skrip akan secara otomatis memulai pemindaian saat halaman dimuat.
-3.  **Menganalisis Hasil:**
-    * Tabel hasil akan menampilkan daftar file yang cocok dengan signatur.
-    * Perhatikan **tingkat keparahan**, **lokasi file**, dan **konteks kode** untuk memahami potensi ancaman.
-    * Gunakan *dropdown* **"Filter Keparahan"** di bagian atas tabel untuk menyaring temuan berdasarkan tingkat risikonya.
-4.  **Ekspor Laporan:**
-    * Klik tombol **"Ekspor ke CSV"** untuk mengunduh laporan lengkap dari semua temuan ke komputer Anda. Ini sangat berguna untuk dokumentasi audit dan analisis *offline*.
+## 🎵 Sound Controls
 
-## Signatur Kustom
+- Click the **Mute** button to toggle sound effects on/off
+- Sound effects include:
+  - Jump/Fly sound
+  - Score increase sound
+  - Game over sound
 
-Alat ini menggunakan file `signatures.json` eksternal sebagai database signaturnya. Anda dapat dengan mudah mengedit atau menambahkan signatur Anda sendiri untuk mendeteksi pola kode tertentu.
+## 📱 Mobile Support
 
-**Struktur `signatures.json`:**
+The game is fully responsive and works on mobile devices:
+- Touch anywhere on the canvas to make the bird fly
+- All buttons are touch-friendly
+- Optimized for smaller screens
 
-```json
-{
-  "signatures": [
-    {
-      "id": "UNIQUE_SIGNATURE_ID",
-      "name": "Nama Signatur Yang Mudah Dipahami",
-      "severity": "CRITICAL", // atau "HIGH", "MEDIUM", "LOW"
-      "patterns": [
-        "regex_pattern_1",
-        "regex_pattern_2" // Daftar pola regex (case-insensitive)
-      ],
-      "description": "Deskripsi singkat dalam Bahasa Inggris.",
-      "description_id": "Deskripsi singkat dalam Bahasa Indonesia.",
-      "remediation": "Saran remediasi dalam Bahasa Inggris.",
-      "remediation_id": "Saran remediasi dalam Bahasa Indonesia."
-    }
-    // ... signatur lainnya
-  ]
-}
+## 🏆 Scoring System
+
+- **1 point** for each pipe successfully passed
+- Your **best score** is automatically saved
+- Try to beat your high score!
+
+## 🛠️ Technical Details
+
+- **Built with**: HTML5 Canvas, JavaScript, CSS3
+- **No dependencies**: Pure vanilla JavaScript
+- **Browser Support**: Works in all modern browsers
+- **Storage**: Uses localStorage to save high scores
+
+## 🎮 Game Physics
+
+- **Gravity**: Constant downward acceleration
+- **Jump Strength**: Instant upward velocity on input
+- **Collision Detection**: Pixel-perfect collision with pipes
+- **Bird Rotation**: Visual rotation based on velocity
+
+## 💡 Tips for High Scores
+
+1. **Find Your Rhythm**: Develop a consistent tapping rhythm
+2. **Stay Centered**: Try to keep the bird in the middle of gaps
+3. **Don't Panic**: Smooth, controlled movements work better than frantic tapping
+4. **Watch Ahead**: Focus on the upcoming pipe, not the current one
+5. **Practice**: The more you play, the better you'll get!
+
+## 🚀 Quick Start
+
+1. Download all three files:
+   - `index.html`
+   - `game.js`
+   - `styles.css`
+2. Keep them in the same folder
+3. Open `index.html` in your browser
+4. Start playing!
+
+## 📝 License
+
+This is a recreation of the classic Flappy Bird game for educational purposes. Enjoy playing!
+
+---
+
+**Have fun and try to beat your high score! 🎯**
