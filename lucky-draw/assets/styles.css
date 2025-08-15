@@ -1,0 +1,84 @@
+/* Base */
+:root {
+	--bg: #0f172a;
+	--panel: #111827;
+	--text: #e5e7eb;
+	--muted: #9ca3af;
+	--primary: #22c55e;
+	--secondary: #2563eb;
+	--danger: #ef4444;
+	--winner: #f59e0b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+	margin: 0;
+	font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+	background: linear-gradient(180deg, #0b1022 0%, #0f172a 100%);
+	color: var(--text);
+}
+
+.container {
+	max-width: 900px;
+	margin: 40px auto;
+	padding: 0 16px;
+}
+
+h1 { text-align: center; margin-bottom: 16px; }
+
+.controls { display: flex; gap: 12px; justify-content: center; margin-bottom: 12px; }
+
+.btn {
+	background: var(--primary);
+	color: #0b1022;
+	border: none;
+	padding: 10px 16px;
+	border-radius: 8px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: transform .05s ease, opacity .2s ease;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn:active { transform: translateY(1px); }
+
+.btn-secondary { background: var(--secondary); color: white; }
+
+.info { display: flex; justify-content: center; gap: 20px; margin-bottom: 12px; color: var(--muted); }
+
+.scroll-box {
+	background: var(--panel);
+	border-radius: 12px;
+	height: 320px;
+	padding: 8px 0;
+	overflow: hidden;
+	box-shadow: 0 15px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+}
+
+.name-list { list-style: none; margin: 0; padding: 0; }
+.name-list li {
+	padding: 10px 16px;
+	border-bottom: 1px solid rgba(255,255,255,.06);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.name-list li.highlight { background: rgba(245, 158, 11, .15); color: #fff; }
+
+.winner-area {
+	margin-top: 16px;
+	text-align: center;
+	font-size: 22px;
+	font-weight: 800;
+}
+.winner-badge {
+	display: inline-block;
+	margin-top: 8px;
+	padding: 6px 10px;
+	background: var(--winner);
+	color: #0f172a;
+	border-radius: 999px;
+	font-weight: 800;
+}
+
+.toast { position: fixed; right: 16px; bottom: 16px; background: rgba(0,0,0,.8); color: white; padding: 10px 14px; border-radius: 8px; }
