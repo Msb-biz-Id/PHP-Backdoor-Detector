@@ -1,0 +1,3 @@
+/* Custom styles */
+.nav-link.active { background: rgba(255,255,255,.1); }
+.small-box .inner h3 { font-size: 1.4rem; font-weight: 600; }

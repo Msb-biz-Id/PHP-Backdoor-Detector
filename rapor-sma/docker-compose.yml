@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    container_name: rapor-sma
+    ports:
+      - "8080:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./:/var/www
+    working_dir: /var/www
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
