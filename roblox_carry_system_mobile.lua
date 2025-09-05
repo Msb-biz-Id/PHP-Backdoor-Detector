@@ -958,8 +958,8 @@ end
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
-    -- F1 - Open/Close main menu
-    if input.KeyCode == Enum.KeyCode.F1 then
+    -- F5 - Open/Close main menu
+    if input.KeyCode == Enum.KeyCode.F5 then
         if isMenuOpen then
             closeMainMenu()
         else
@@ -967,16 +967,16 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
         end
     end
     
-    -- F2 - Stop current carry
-    if input.KeyCode == Enum.KeyCode.F2 then
+    -- F6 - Stop current carry
+    if input.KeyCode == Enum.KeyCode.F6 then
         if isCarrying or isBeingCarried then
             stopCarryEvent:FireServer()
             stopCarry()
         end
     end
     
-    -- F3 - Close all UI
-    if input.KeyCode == Enum.KeyCode.F3 then
+    -- F7 - Close all UI
+    if input.KeyCode == Enum.KeyCode.F7 then
         closeAllUI()
     end
     
@@ -1005,13 +1005,13 @@ print("Controls:")
 if isMobile then
     print("  Hold touch on player body to request carry")
     print("  B button - Stop current carry")
-    print("  F1 - Open/Close main menu")
-    print("  F3 - Close all UI")
+    print("  F5 - Open/Close main menu")
+    print("  F7 - Close all UI")
 else
     print("  Click on player body to request carry")
-    print("  F1 - Open/Close main menu")
-    print("  F2 - Stop current carry")
-    print("  F3 - Close all UI")
+    print("  F5 - Open/Close main menu")
+    print("  F6 - Stop current carry")
+    print("  F7 - Close all UI")
     print("  ESC - Close all UI")
 end
 print("  UI will show carry options and accept/reject buttons")
@@ -1019,4 +1019,4 @@ print("  UI will show carry options and accept/reject buttons")
 -- Show initial help
 task.wait(2)
 print("💡 Tip: Get close to other players and " .. (isMobile and "hold touch" or "click") .. " on their body to start carrying!")
-print("💡 Press F1 to open main menu for system info!")
+print("💡 Press F5 to open main menu for system info!")
