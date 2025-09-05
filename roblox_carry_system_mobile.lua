@@ -357,6 +357,14 @@ end
 
 -- Mobile-optimized carry selection UI
 local function createCarrySelectionUI(targetPlayer)
+    print("Creating carry selection UI for: " .. targetPlayer.Name)
+    
+    -- Close existing UI first
+    if carryUI then
+        closeCarryUI()
+        task.wait(0.1) -- Small delay to ensure cleanup
+    end
+    
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "CarrySelectionUI"
     screenGui.ResetOnSpawn = false
@@ -552,6 +560,13 @@ local function createCarrySelectionUI(targetPlayer)
     })
     tween:Play()
     
+    print("Carry selection UI created successfully")
+    print("ScreenGui parent: " .. (screenGui.Parent and screenGui.Parent.Name or "nil"))
+    print("MainFrame visible: " .. tostring(mainFrame.Visible))
+    print("MainFrame size: " .. tostring(mainFrame.Size))
+    print("MainFrame position: " .. tostring(mainFrame.Position))
+    
+    carryUI = screenGui
     return screenGui
 end
 
@@ -772,7 +787,10 @@ end
 
 -- Check if player is in range
 local function isPlayerInRange(targetPlayer)
+    print("Checking range for: " .. (targetPlayer and targetPlayer.Name or "nil"))
+    
     if not Character or not targetPlayer.Character then
+        print("No character found")
         return false
     end
     
@@ -780,10 +798,12 @@ local function isPlayerInRange(targetPlayer)
     local targetRootPart = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
     
     if not humanoidRootPart or not targetRootPart then
+        print("No HumanoidRootPart found")
         return false
     end
     
     local distance = (humanoidRootPart.Position - targetRootPart.Position).Magnitude
+    print("Distance: " .. distance .. " studs (max: " .. CARRY_DISTANCE .. ")")
     return distance <= CARRY_DISTANCE
 end
 
@@ -828,16 +848,23 @@ local function onTouchStarted(input, gameProcessed)
             task.wait(0.1)
             if tick() - touchStartTime >= TOUCH_HOLD_TIME then
                 -- Touch held long enough, check for player
-                local target = workspace:FindPartOnRay(Ray.new(
-                    workspace.CurrentCamera.CFrame.Position,
-                    workspace.CurrentCamera.CFrame.LookVector * 1000
-                ))
+                local camera = workspace.CurrentCamera
+                local unitRay = camera:ScreenPointToRay(input.Position.X, input.Position.Y)
+                local raycastParams = RaycastParams.new()
+                raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
+                raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
                 
-                if target and target.Parent then
-                    local humanoid = target.Parent:FindFirstChild("Humanoid")
+                local raycastResult = workspace:Raycast(unitRay.Origin, unitRay.Direction * 1000, raycastParams)
+                
+                if raycastResult and raycastResult.Instance then
+                    local hitPart = raycastResult.Instance
+                    local character = hitPart.Parent
+                    local humanoid = character:FindFirstChild("Humanoid")
+                    
                     if humanoid then
-                        local player = Players:GetPlayerFromCharacter(target.Parent)
+                        local player = Players:GetPlayerFromCharacter(character)
                         if player and player ~= LocalPlayer then
+                            print("Touch detected player: " .. player.Name)
                             onPlayerClicked(player)
                             break
                         end
@@ -856,24 +883,42 @@ end
 
 -- Handle player click (for PC)
 local function onPlayerClicked(targetPlayer)
-    if targetPlayer == LocalPlayer then return end
-    if isCarrying or isBeingCarried then return end
+    print("onPlayerClicked called for: " .. (targetPlayer and targetPlayer.Name or "nil"))
+    
+    if targetPlayer == LocalPlayer then 
+        print("Cannot carry yourself")
+        return 
+    end
+    
+    if isCarrying or isBeingCarried then 
+        print("Already carrying or being carried")
+        return 
+    end
+    
     if not isPlayerInRange(targetPlayer) then
-        print("Player too far away!")
+        print("Player too far away! Distance: " .. (targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") and (Character:FindFirstChild("HumanoidRootPart") and (Character.HumanoidRootPart.Position - targetPlayer.Character.HumanoidRootPart.Position).Magnitude or "unknown") or "unknown"))
         vibrateDevice("heavy")
         return
     end
     
     local canRequest, errorMsg = canRequestCarry(targetPlayer)
     if not canRequest then
-        print(errorMsg)
+        print("Cooldown error: " .. errorMsg)
         vibrateDevice("heavy")
         return
     end
     
+    print("Creating carry selection UI for: " .. targetPlayer.Name)
     setRequestCooldown(targetPlayer)
     vibrateDevice("medium")
-    carryUI = createCarrySelectionUI(targetPlayer)
+    
+    -- Create UI
+    local newUI = createCarrySelectionUI(targetPlayer)
+    if newUI then
+        print("UI created successfully, carryUI set")
+    else
+        print("Failed to create UI")
+    end
 end
 
 -- Handle remote events
@@ -939,15 +984,22 @@ else
     -- PC mouse controls
     local Mouse = LocalPlayer:GetMouse()
     Mouse.Button1Down:Connect(function()
+        print("Mouse clicked, target: " .. (Mouse.Target and Mouse.Target.Name or "nil"))
         local target = Mouse.Target
         if target and target.Parent then
+            print("Target parent: " .. target.Parent.Name)
             local humanoid = target.Parent:FindFirstChild("Humanoid")
             if humanoid then
                 local player = Players:GetPlayerFromCharacter(target.Parent)
+                print("Found player: " .. (player and player.Name or "nil"))
                 if player then
                     onPlayerClicked(player)
                 end
+            else
+                print("No humanoid found in: " .. target.Parent.Name)
             end
+        else
+            print("No target or target parent")
         end
     end)
     
@@ -1016,7 +1068,29 @@ else
 end
 print("  UI will show carry options and accept/reject buttons")
 
+-- Test function to create UI manually
+local function testCreateUI()
+    print("Testing UI creation...")
+    local testPlayer = Players:GetPlayers()[2] -- Get second player
+    if testPlayer and testPlayer ~= LocalPlayer then
+        print("Creating test UI for: " .. testPlayer.Name)
+        carryUI = createCarrySelectionUI(testPlayer)
+    else
+        print("No other players found for testing")
+    end
+end
+
 -- Show initial help
 task.wait(2)
 print("💡 Tip: Get close to other players and " .. (isMobile and "hold touch" or "click") .. " on their body to start carrying!")
 print("💡 Press F5 to open main menu for system info!")
+print("💡 Press F8 to test UI creation (debug)")
+
+-- Add F8 for testing
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.F8 then
+        testCreateUI()
+    end
+end)
