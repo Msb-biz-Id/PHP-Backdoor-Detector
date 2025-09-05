@@ -38,6 +38,22 @@ local requestCooldowns = {}
 local lastTouchTime = 0
 local isTouching = false
 
+-- Close carry UI function (defined early)
+local function closeCarryUI()
+    if carryUI then
+        local mainFrame = carryUI:FindFirstChild("MainFrame")
+        if mainFrame then
+            TweenService:Create(mainFrame, TweenInfo.new(0.2), {
+                Position = UDim2.new(1, 0, 0.5, mainFrame.Size.Y.Offset / 2)
+            }):Play()
+            
+            task.wait(0.2)
+        end
+        carryUI:Destroy()
+        carryUI = nil
+    end
+end
+
 -- Create RemoteEvents
 local function createRemoteEvents()
     local folder = ReplicatedStorage:FindFirstChild("CarrySystemEvents")
@@ -65,6 +81,7 @@ end
 
 -- Get RemoteEvents
 local events = createRemoteEvents()
+print("RemoteEvents created:", events and "Success" or "Failed")
 
 -- Debounce system
 local function canRequestCarry(targetPlayer)
@@ -175,7 +192,9 @@ local function createCarrySelectionUI(targetPlayer)
         
         -- Click to select
         animButton.MouseButton1Click:Connect(function()
-            events.RequestCarry:FireServer(targetPlayer, animation)
+            if events and events.RequestCarry then
+                events.RequestCarry:FireServer(targetPlayer, animation)
+            end
             closeCarryUI()
         end)
     end
@@ -294,17 +313,23 @@ local function createAcceptRejectUI(requester, animationData)
     
     -- Button functionality
     closeButton.MouseButton1Click:Connect(function()
-        events.RejectCarry:FireServer(requester)
+        if events and events.RejectCarry then
+            events.RejectCarry:FireServer(requester)
+        end
         closeCarryUI()
     end)
     
     acceptButton.MouseButton1Click:Connect(function()
-        events.AcceptCarry:FireServer(requester)
+        if events and events.AcceptCarry then
+            events.AcceptCarry:FireServer(requester)
+        end
         closeCarryUI()
     end)
     
     rejectButton.MouseButton1Click:Connect(function()
-        events.RejectCarry:FireServer(requester)
+        if events and events.RejectCarry then
+            events.RejectCarry:FireServer(requester)
+        end
         closeCarryUI()
     end)
     
@@ -315,7 +340,9 @@ local function createAcceptRejectUI(requester, animationData)
         timeLeft = timeLeft - RunService.Heartbeat:Wait()
         if timeLeft <= 0 then
             timerConnection:Disconnect()
-            events.RejectCarry:FireServer(requester)
+            if events and events.RejectCarry then
+                events.RejectCarry:FireServer(requester)
+            end
             closeCarryUI()
         end
     end)
@@ -330,21 +357,6 @@ local function createAcceptRejectUI(requester, animationData)
     return screenGui
 end
 
--- Close carry UI
-local function closeCarryUI()
-    if carryUI then
-        local mainFrame = carryUI:FindFirstChild("MainFrame")
-        if mainFrame then
-            TweenService:Create(mainFrame, TweenInfo.new(0.2), {
-                Position = UDim2.new(1, 0, 0.5, mainFrame.Size.Y.Offset / 2)
-            }):Play()
-            
-            task.wait(0.2)
-        end
-        carryUI:Destroy()
-        carryUI = nil
-    end
-end
 
 -- Start carry animation
 local function startCarryAnimation(animationData)
@@ -424,41 +436,53 @@ local function onTouchEnded(input, gameProcessed)
 end
 
 -- Handle remote events
-events.RequestCarry.OnClientEvent:Connect(function(requester, animationData)
-    if isBeingCarried or isCarrying then
-        events.RejectCarry:FireServer(requester)
-        return
-    end
-    createAcceptRejectUI(requester, animationData)
-end)
+if events.RequestCarry then
+    events.RequestCarry.OnClientEvent:Connect(function(requester, animationData)
+        if isBeingCarried or isCarrying then
+            if events.RejectCarry then
+                events.RejectCarry:FireServer(requester)
+            end
+            return
+        end
+        createAcceptRejectUI(requester, animationData)
+    end)
+end
 
-events.AcceptCarry.OnClientEvent:Connect(function(accepter, animationData)
-    closeCarryUI()
-    isCarrying = true
-    currentCarried = accepter
-    startCarryAnimation(animationData)
-    
-    task.wait(CARRY_DURATION)
-    stopCarry()
-end)
+if events.AcceptCarry then
+    events.AcceptCarry.OnClientEvent:Connect(function(accepter, animationData)
+        closeCarryUI()
+        isCarrying = true
+        currentCarried = accepter
+        startCarryAnimation(animationData)
+        
+        task.wait(CARRY_DURATION)
+        stopCarry()
+    end)
+end
 
-events.RejectCarry.OnClientEvent:Connect(function(rejecter)
-    closeCarryUI()
-    print(rejecter.Name .. " rejected carry")
-end)
+if events.RejectCarry then
+    events.RejectCarry.OnClientEvent:Connect(function(rejecter)
+        closeCarryUI()
+        print(rejecter.Name .. " rejected carry")
+    end)
+end
 
-events.StartCarry.OnClientEvent:Connect(function(carrier, animationData)
-    isBeingCarried = true
-    currentCarrier = carrier
-    startCarryAnimation(animationData)
-    
-    task.wait(CARRY_DURATION)
-    stopCarry()
-end)
+if events.StartCarry then
+    events.StartCarry.OnClientEvent:Connect(function(carrier, animationData)
+        isBeingCarried = true
+        currentCarrier = carrier
+        startCarryAnimation(animationData)
+        
+        task.wait(CARRY_DURATION)
+        stopCarry()
+    end)
+end
 
-events.StopCarry.OnClientEvent:Connect(function()
-    stopCarry()
-end)
+if events.StopCarry then
+    events.StopCarry.OnClientEvent:Connect(function()
+        stopCarry()
+    end)
+end
 
 -- Input handling
 if isMobile then
@@ -496,7 +520,9 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     
     if input.KeyCode == Enum.KeyCode.F6 then
         if isCarrying or isBeingCarried then
-            events.StopCarry:FireServer()
+            if events and events.StopCarry then
+                events.StopCarry:FireServer()
+            end
             stopCarry()
         end
     end
