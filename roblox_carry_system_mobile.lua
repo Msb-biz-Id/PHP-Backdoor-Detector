@@ -58,6 +58,7 @@ local CARRY_ANIMATIONS = {
 
 -- Variables
 local carryUI = nil
+local mainMenuUI = nil
 local isCarrying = false
 local isBeingCarried = false
 local currentCarrier = nil
@@ -69,6 +70,7 @@ local touchStartTime = 0
 local touchStartPosition = Vector2.new()
 local isTouching = false
 local touchConnection = nil
+local isMenuOpen = false
 
 -- Mobile UI scaling
 local function getMobileScale()
@@ -177,7 +179,7 @@ local function createCarryRequestUI(targetPlayer, animationStyle)
     -- Title
     local title = Instance.new("TextLabel")
     title.Name = "Title"
-    title.Size = UDim2.new(1, 0, 0, 60 * mobileScale)
+    title.Size = UDim2.new(1, -60, 0, 60 * mobileScale)
     title.Position = UDim2.new(0, 0, 0, 0)
     title.BackgroundTransparency = 1
     title.Text = "🚀 Carry Request"
@@ -185,6 +187,23 @@ local function createCarryRequestUI(targetPlayer, animationStyle)
     title.TextScaled = true
     title.Font = Enum.Font.GothamBold
     title.Parent = mainFrame
+    
+    -- Close button
+    local closeButton = Instance.new("TextButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Size = UDim2.new(0, 50 * mobileScale, 0, 50 * mobileScale)
+    closeButton.Position = UDim2.new(1, -60 * mobileScale, 0, 5 * mobileScale)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+    closeButton.BorderSizePixel = 0
+    closeButton.Text = "×"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.TextScaled = true
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.Parent = mainFrame
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 25)
+    closeCorner.Parent = closeButton
     
     -- Player name
     local playerName = Instance.new("TextLabel")
@@ -291,6 +310,13 @@ local function createCarryRequestUI(targetPlayer, animationStyle)
     addTouchFeedback(acceptButton, Color3.fromRGB(70, 220, 70), Color3.fromRGB(50, 200, 50))
     addTouchFeedback(rejectButton, Color3.fromRGB(220, 70, 70), Color3.fromRGB(200, 50, 50))
     
+    -- Close button functionality
+    closeButton.MouseButton1Click:Connect(function()
+        vibrateDevice("light")
+        rejectCarryEvent:FireServer(targetPlayer)
+        closeCarryUI()
+    end)
+    
     -- Button functionality
     acceptButton.MouseButton1Click:Connect(function()
         acceptCarryEvent:FireServer(targetPlayer)
@@ -357,7 +383,7 @@ local function createCarrySelectionUI(targetPlayer)
     -- Title
     local title = Instance.new("TextLabel")
     title.Name = "Title"
-    title.Size = UDim2.new(1, 0, 0, 60 * mobileScale)
+    title.Size = UDim2.new(1, -60, 0, 60 * mobileScale)
     title.Position = UDim2.new(0, 0, 0, 0)
     title.BackgroundTransparency = 1
     title.Text = "🎭 Select Carry Style"
@@ -365,6 +391,23 @@ local function createCarrySelectionUI(targetPlayer)
     title.TextScaled = true
     title.Font = Enum.Font.GothamBold
     title.Parent = mainFrame
+    
+    -- Close button
+    local closeButton = Instance.new("TextButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Size = UDim2.new(0, 50 * mobileScale, 0, 50 * mobileScale)
+    closeButton.Position = UDim2.new(1, -60 * mobileScale, 0, 5 * mobileScale)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+    closeButton.BorderSizePixel = 0
+    closeButton.Text = "×"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.TextScaled = true
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.Parent = mainFrame
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 25)
+    closeCorner.Parent = closeButton
     
     -- Player name
     local playerName = Instance.new("TextLabel")
@@ -488,6 +531,12 @@ local function createCarrySelectionUI(targetPlayer)
     cancelCorner.CornerRadius = UDim.new(0, 12)
     cancelCorner.Parent = cancelButton
     
+    -- Close button functionality
+    closeButton.MouseButton1Click:Connect(function()
+        vibrateDevice("light")
+        closeCarryUI()
+    end)
+    
     cancelButton.MouseButton1Click:Connect(function()
         vibrateDevice("light")
         closeCarryUI()
@@ -528,6 +577,197 @@ local function closeCarryUI()
             carryUI = nil
         end
     end
+end
+
+-- Create main menu UI
+local function createMainMenuUI()
+    if mainMenuUI then return end
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "CarryMainMenu"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    
+    local mobileScale = getMobileScale()
+    local baseSize = isTablet and 300 or 250
+    local baseHeight = isTablet and 200 or 150
+    
+    -- Main frame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = UDim2.new(0, baseSize * mobileScale, 0, baseHeight * mobileScale)
+    mainFrame.Position = UDim2.new(0.5, -(baseSize * mobileScale) / 2, 0.5, -(baseHeight * mobileScale) / 2)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+    
+    -- Corner radius
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 15)
+    corner.Parent = mainFrame
+    
+    -- Drop shadow
+    local shadow = Instance.new("ImageLabel")
+    shadow.Name = "Shadow"
+    shadow.Size = UDim2.new(1, 10, 1, 10)
+    shadow.Position = UDim2.new(0, -5, 0, -5)
+    shadow.BackgroundTransparency = 1
+    shadow.Image = "rbxassetid://1316045217"
+    shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.ImageTransparency = 0.3
+    shadow.ScaleType = Enum.ScaleType.Slice
+    shadow.SliceCenter = Rect.new(10, 10, 118, 118)
+    shadow.ZIndex = mainFrame.ZIndex - 1
+    shadow.Parent = screenGui
+    
+    -- Title
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Size = UDim2.new(1, -60, 0, 50 * mobileScale)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "🚀 Carry System Menu"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextScaled = true
+    title.Font = Enum.Font.GothamBold
+    title.Parent = mainFrame
+    
+    -- Close button
+    local closeButton = Instance.new("TextButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Size = UDim2.new(0, 40 * mobileScale, 0, 40 * mobileScale)
+    closeButton.Position = UDim2.new(1, -50 * mobileScale, 0, 5 * mobileScale)
+    closeButton.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+    closeButton.BorderSizePixel = 0
+    closeButton.Text = "×"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.TextScaled = true
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.Parent = mainFrame
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 20)
+    closeCorner.Parent = closeButton
+    
+    -- Status label
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Name = "Status"
+    statusLabel.Size = UDim2.new(1, -20, 0, 30 * mobileScale)
+    statusLabel.Position = UDim2.new(0, 10, 0, 60 * mobileScale)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Text = "System Ready"
+    statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+    statusLabel.TextScaled = true
+    statusLabel.Font = Enum.Font.Gotham
+    statusLabel.Parent = mainFrame
+    
+    -- Instructions
+    local instructionsLabel = Instance.new("TextLabel")
+    instructionsLabel.Name = "Instructions"
+    instructionsLabel.Size = UDim2.new(1, -20, 0, 40 * mobileScale)
+    instructionsLabel.Position = UDim2.new(0, 10, 0, 90 * mobileScale)
+    instructionsLabel.BackgroundTransparency = 1
+    instructionsLabel.Text = isMobile and "Hold touch on player to carry" or "Click on player to carry"
+    instructionsLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    instructionsLabel.TextScaled = true
+    instructionsLabel.Font = Enum.Font.Gotham
+    instructionsLabel.Parent = mainFrame
+    
+    -- Close all button
+    local closeAllButton = Instance.new("TextButton")
+    closeAllButton.Name = "CloseAllButton"
+    closeAllButton.Size = UDim2.new(1, -20, 0, 40 * mobileScale)
+    closeAllButton.Position = UDim2.new(0, 10, 1, -50 * mobileScale)
+    closeAllButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    closeAllButton.BorderSizePixel = 0
+    closeAllButton.Text = "Close All UI"
+    closeAllButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeAllButton.TextScaled = true
+    closeAllButton.Font = Enum.Font.GothamBold
+    closeAllButton.Parent = mainFrame
+    
+    local closeAllCorner = Instance.new("UICorner")
+    closeAllCorner.CornerRadius = UDim.new(0, 8)
+    closeAllCorner.Parent = closeAllButton
+    
+    -- Button functionality
+    closeButton.MouseButton1Click:Connect(function()
+        vibrateDevice("light")
+        closeMainMenu()
+    end)
+    
+    closeAllButton.MouseButton1Click:Connect(function()
+        vibrateDevice("medium")
+        closeAllUI()
+    end)
+    
+    -- Mobile touch feedback
+    local function addTouchFeedback(button, hoverColor, normalColor)
+        button.MouseEnter:Connect(function()
+            vibrateDevice("light")
+            local tween = TweenService:Create(button, TweenInfo.new(0.2), {
+                BackgroundColor3 = hoverColor
+            })
+            tween:Play()
+        end)
+        
+        button.MouseLeave:Connect(function()
+            local tween = TweenService:Create(button, TweenInfo.new(0.2), {
+                BackgroundColor3 = normalColor
+            })
+            tween:Play()
+        end)
+    end
+    
+    addTouchFeedback(closeButton, Color3.fromRGB(255, 150, 150), Color3.fromRGB(255, 100, 100))
+    addTouchFeedback(closeAllButton, Color3.fromRGB(130, 130, 130), Color3.fromRGB(100, 100, 100))
+    
+    -- Animate in
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    
+    local tween = TweenService:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+        Size = UDim2.new(0, baseSize * mobileScale, 0, baseHeight * mobileScale),
+        Position = UDim2.new(0.5, -(baseSize * mobileScale) / 2, 0.5, -(baseHeight * mobileScale) / 2)
+    })
+    tween:Play()
+    
+    mainMenuUI = screenGui
+    isMenuOpen = true
+    return screenGui
+end
+
+-- Close main menu
+local function closeMainMenu()
+    if not mainMenuUI then return end
+    
+    local mainFrame = mainMenuUI:FindFirstChild("MainFrame")
+    if mainFrame then
+        local tween = TweenService:Create(mainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0.5, 0, 0.5, 0)
+        })
+        
+        tween:Play()
+        tween.Completed:Connect(function()
+            if mainMenuUI then
+                mainMenuUI:Destroy()
+                mainMenuUI = nil
+                isMenuOpen = false
+            end
+        end)
+    else
+        mainMenuUI:Destroy()
+        mainMenuUI = nil
+        isMenuOpen = false
+    end
+end
+
+-- Close all UI
+local function closeAllUI()
+    closeCarryUI()
+    closeMainMenu()
+    print("All UI closed")
 end
 
 -- Check if player is in range
@@ -714,15 +954,35 @@ else
     print("🖱️ PC controls enabled")
 end
 
--- Keyboard shortcut (F2 to stop carry)
+-- Keyboard shortcuts
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
+    -- F1 - Open/Close main menu
+    if input.KeyCode == Enum.KeyCode.F1 then
+        if isMenuOpen then
+            closeMainMenu()
+        else
+            createMainMenuUI()
+        end
+    end
+    
+    -- F2 - Stop current carry
     if input.KeyCode == Enum.KeyCode.F2 then
         if isCarrying or isBeingCarried then
             stopCarryEvent:FireServer()
             stopCarry()
         end
+    end
+    
+    -- F3 - Close all UI
+    if input.KeyCode == Enum.KeyCode.F3 then
+        closeAllUI()
+    end
+    
+    -- ESC - Close all UI (alternative)
+    if input.KeyCode == Enum.KeyCode.Escape then
+        closeAllUI()
     end
 end)
 
@@ -731,8 +991,8 @@ LocalPlayer.CharacterAdded:Connect(function(character)
     Character = character
     Humanoid = character:WaitForChild("Humanoid")
     
-    -- Close UI if open
-    closeCarryUI()
+    -- Close all UI if open
+    closeAllUI()
     
     -- Stop any ongoing carry
     stopCarry()
@@ -745,12 +1005,18 @@ print("Controls:")
 if isMobile then
     print("  Hold touch on player body to request carry")
     print("  B button - Stop current carry")
+    print("  F1 - Open/Close main menu")
+    print("  F3 - Close all UI")
 else
     print("  Click on player body to request carry")
+    print("  F1 - Open/Close main menu")
     print("  F2 - Stop current carry")
+    print("  F3 - Close all UI")
+    print("  ESC - Close all UI")
 end
 print("  UI will show carry options and accept/reject buttons")
 
 -- Show initial help
 task.wait(2)
 print("💡 Tip: Get close to other players and " .. (isMobile and "hold touch" or "click") .. " on their body to start carrying!")
+print("💡 Press F1 to open main menu for system info!")
