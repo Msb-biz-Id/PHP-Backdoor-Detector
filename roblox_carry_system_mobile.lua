@@ -14,10 +14,19 @@ local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
--- Mobile detection
+-- Mobile detection (fixed for LocalScript)
 local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-local isTablet = isMobile and GuiService:GetScreenResolution().Y > 1000
+local isTablet = false
 local isConsole = UserInputService.GamepadEnabled and not UserInputService.KeyboardEnabled
+
+-- Check tablet after camera is ready
+task.spawn(function()
+    task.wait(1) -- Wait for camera to be ready
+    if isMobile and workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize then
+        isTablet = workspace.CurrentCamera.ViewportSize.Y > 1000
+        print("Device detection - Mobile: " .. tostring(isMobile) .. ", Tablet: " .. tostring(isTablet) .. ", Console: " .. tostring(isConsole))
+    end
+end)
 
 -- Configuration
 local CARRY_DISTANCE = 12 -- Increased for mobile
@@ -72,11 +81,21 @@ local isTouching = false
 local touchConnection = nil
 local isMenuOpen = false
 
--- Mobile UI scaling
+-- Mobile UI scaling (fixed for LocalScript)
 local function getMobileScale()
-    local screenSize = GuiService:GetScreenResolution()
-    local baseScale = math.min(screenSize.X, screenSize.Y) / 1080
-    return math.clamp(baseScale * MOBILE_UI_SCALE, 0.8, 1.5)
+    -- Use ViewportSize instead of GetScreenResolution for LocalScript compatibility
+    local camera = workspace.CurrentCamera
+    if not camera or not camera.ViewportSize then
+        print("Warning: Camera or ViewportSize not available, using default scale")
+        return 1.0
+    end
+    
+    local viewportSize = camera.ViewportSize
+    local baseScale = math.min(viewportSize.X, viewportSize.Y) / 1080
+    local finalScale = math.clamp(baseScale * MOBILE_UI_SCALE, 0.8, 1.5)
+    
+    print("Mobile scale calculated: " .. finalScale .. " (viewport: " .. viewportSize.X .. "x" .. viewportSize.Y .. ")")
+    return finalScale
 end
 
 -- Create RemoteEvents for carry system
@@ -145,8 +164,11 @@ local function createCarryRequestUI(targetPlayer, animationStyle)
     screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
     
     local mobileScale = getMobileScale()
-    local baseSize = isTablet and 400 or 350
-    local baseHeight = isTablet and 250 or 200
+    -- Use viewport size to determine if tablet (fallback)
+    local viewportHeight = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize and workspace.CurrentCamera.ViewportSize.Y or 1080
+    local isTabletNow = isTablet or (isMobile and viewportHeight > 1000)
+    local baseSize = isTabletNow and 400 or 350
+    local baseHeight = isTabletNow and 250 or 200
     
     -- Main frame
     local mainFrame = Instance.new("Frame")
@@ -371,8 +393,11 @@ local function createCarrySelectionUI(targetPlayer)
     screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
     
     local mobileScale = getMobileScale()
-    local baseSize = isTablet and 450 or 400
-    local baseHeight = isTablet and 400 or 350
+    -- Use viewport size to determine if tablet (fallback)
+    local viewportHeight = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize and workspace.CurrentCamera.ViewportSize.Y or 1080
+    local isTabletNow = isTablet or (isMobile and viewportHeight > 1000)
+    local baseSize = isTabletNow and 450 or 400
+    local baseHeight = isTabletNow and 400 or 350
     
     -- Main frame
     local mainFrame = Instance.new("Frame")
@@ -604,8 +629,11 @@ local function createMainMenuUI()
     screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
     
     local mobileScale = getMobileScale()
-    local baseSize = isTablet and 300 or 250
-    local baseHeight = isTablet and 200 or 150
+    -- Use viewport size to determine if tablet (fallback)
+    local viewportHeight = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize and workspace.CurrentCamera.ViewportSize.Y or 1080
+    local isTabletNow = isTablet or (isMobile and viewportHeight > 1000)
+    local baseSize = isTabletNow and 300 or 250
+    local baseHeight = isTabletNow and 200 or 150
     
     -- Main frame
     local mainFrame = Instance.new("Frame")
